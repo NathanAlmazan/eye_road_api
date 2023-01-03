@@ -33,26 +33,26 @@ route.get('/', async (req, res) => {
 
     const result = violations.filter(violation => !recordIds.includes(violation.id.toString()));
 
-    await redisClient.connect();
-    const totalViolations = await redisClient.get('violations');
+    // await redisClient.connect();
+    // const totalViolations = await redisClient.get('violations');
 
-    if (totalViolations && parseInt(totalViolations) > violations.length) {
-        // create payload: specified the details of the push notification
-        const payload = JSON.stringify({
-            title: violations[0].violation_type + 'Violation Detected',
-            body: 'Go to eyeroad.nat911.com to see details', 
-            icon: 'https://res.cloudinary.com/ddpqji6uq/image/upload/v1672565207/eye_road_wc5mwp.webp'
-        });
+    // if (totalViolations && parseInt(totalViolations) > violations.length) {
+    //     // create payload: specified the details of the push notification
+    //     const payload = JSON.stringify({
+    //         title: violations[0].violation_type + 'Violation Detected',
+    //         body: 'Go to eyeroad.nat911.com to see details', 
+    //         icon: 'https://res.cloudinary.com/ddpqji6uq/image/upload/v1672565207/eye_road_wc5mwp.webp'
+    //     });
 
-        // pass the object into sendNotification function and catch any error
-        const subscribed = await client.traffic_monitoring_subscribedofficers.findMany();
+    //     // pass the object into sendNotification function and catch any error
+    //     const subscribed = await client.traffic_monitoring_subscribedofficers.findMany();
 
-        subscribed.forEach(sub => {
-            webpush.sendNotification(JSON.parse(sub.subscription), payload).catch(err => console.error(err));
-        })
-    }
+    //     subscribed.forEach(sub => {
+    //         webpush.sendNotification(JSON.parse(sub.subscription), payload).catch(err => console.error(err));
+    //     })
+    // }
 
-    await redisClient.set('violations', violations.length.toString());
+    // await redisClient.set('violations', violations.length.toString());
 
     return res.status(200).json(result.map(res => ({
         id: res.id.toString(),
