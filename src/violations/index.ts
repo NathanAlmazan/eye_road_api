@@ -41,7 +41,7 @@ route.get('/', async (req, res) => {
 
     const totalViolations = await redisClient.get('violations');
 
-    if (totalViolations && parseInt(totalViolations) > violations.length) {
+    if (totalViolations && parseInt(totalViolations) < violations.length) {
         // create payload: specified the details of the push notification
         const payload = JSON.stringify({
             title: getViolationType(violations[0].violation_type) + ' Violation Detected',
