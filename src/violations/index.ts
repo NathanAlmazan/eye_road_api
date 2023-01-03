@@ -17,6 +17,16 @@ interface RecordedViolations {
     fee: number;
 }
 
+function getViolationType(type: string) {
+    switch (type) {
+      case "ILL": return "Illegal Loading and Unloading";
+      case "BRL": return "Beating the Red Light";
+      case "OVS": return "Over Speeding";
+      default: return "None";
+    }
+}
+
+
 route.get('/', async (req, res) => {
     const violations = await client.traffic_monitoring_recordedviolations.findMany({
         orderBy: {
@@ -25,30 +35,29 @@ route.get('/', async (req, res) => {
     })
 
     const records = await client.traffic_monitoring_filedviolations.findMany();
-    const recordIds = records.map(record => parseInt(record.id.toString()))
+    const recordIds = records.map(record => parseInt(record.violation_record.toString()))
 
     const result = violations.filter(violation => !recordIds.includes(parseInt(violation.id.toString())));
 
-    // await redisClient.connect();
-    // const totalViolations = await redisClient.get('violations');
+    const totalViolations = await redisClient.get('violations');
 
-    // if (totalViolations && parseInt(totalViolations) > violations.length) {
-    //     // create payload: specified the details of the push notification
-    //     const payload = JSON.stringify({
-    //         title: violations[0].violation_type + 'Violation Detected',
-    //         body: 'Go to eyeroad.nat911.com to see details', 
-    //         icon: 'https://res.cloudinary.com/ddpqji6uq/image/upload/v1672565207/eye_road_wc5mwp.webp'
-    //     });
+    if (totalViolations && parseInt(totalViolations) > violations.length) {
+        // create payload: specified the details of the push notification
+        const payload = JSON.stringify({
+            title: getViolationType(violations[0].violation_type) + ' Violation Detected',
+            body: 'Go to eyeroad.nat911.com to see details', 
+            icon: 'https://res.cloudinary.com/ddpqji6uq/image/upload/v1672565207/eye_road_wc5mwp.webp'
+        });
 
-    //     // pass the object into sendNotification function and catch any error
-    //     const subscribed = await client.traffic_monitoring_subscribedofficers.findMany();
+        // pass the object into sendNotification function and catch any error
+        const subscribed = await client.traffic_monitoring_subscribedofficers.findMany();
 
-    //     subscribed.forEach(sub => {
-    //         webpush.sendNotification(JSON.parse(sub.subscription), payload).catch(err => console.error(err));
-    //     })
-    // }
+        subscribed.forEach(sub => {
+            webpush.sendNotification(JSON.parse(sub.subscription), payload).catch(err => console.error(err));
+        })
+    }
 
-    // await redisClient.set('violations', violations.length.toString());
+    await redisClient.set('violations', violations.length.toString());
 
     return res.status(200).json(result.map(res => ({
         id: res.id.toString(),
@@ -109,27 +118,6 @@ route.get('/record/:id', async (req, res) => {
     }
 
     return res.status(404).json({ message: 'Record not found.' });
-})
-
-route.get('/notification', async (req, res) => {
-    // create payload: specified the details of the push notification
-    await redisClient.set('violations', 2);
-    const totalViolations = await redisClient.get('violations');
-
-    const payload = JSON.stringify({
-        title: totalViolations + ' Violation Detected',
-        body: 'Go to eyeroad.nat911.com to see details', 
-        icon: 'https://res.cloudinary.com/ddpqji6uq/image/upload/v1672565207/eye_road_wc5mwp.webp'
-    });
-
-    // pass the object into sendNotification function and catch any error
-    const subscribed = await client.traffic_monitoring_subscribedofficers.findMany();
-
-    subscribed.forEach(sub => {
-        webpush.sendNotification(JSON.parse(sub.subscription), payload).catch(err => console.error(err));
-    })
-
-    return res.status(201).json({ message: "Sent notification successfully." })
 })
 
 export default route;
