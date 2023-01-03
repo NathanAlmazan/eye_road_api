@@ -21,4 +21,21 @@ route.get('/', async (req, res) => {
     })));
 })
 
+route.get('/:id', async (req, res) => {
+    const record = await client.traffic_monitoring_trafficfootage.findUnique({
+        where: {
+            id: parseInt(req.params.id)
+        }
+    })
+
+    if (record === null) return res.status(404).json({ message: 'No record found' });
+
+    return res.status(200).json({
+        id: record.id.toString(),
+        name: record.file_name,
+        url: baseUrl + record.file_data,
+        created: record.file_created.toISOString()
+    });
+})
+
 export default route;

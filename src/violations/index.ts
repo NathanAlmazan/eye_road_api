@@ -15,6 +15,7 @@ interface RecordedViolations {
     plate: string;
     created?: Date;
     fee: number;
+    record?: number | null;
 }
 
 function getViolationType(type: string) {
@@ -84,7 +85,8 @@ route.get('/records', async (req, res) => {
             plate: recorded[i].vehicle_plate_number,
             type: footage?.violation_type,
             created: footage?.violation_date,
-            fee: recorded[i].violation_fee
+            fee: recorded[i].violation_fee,
+            record: footage?.violation_footage
         })
     }
 
