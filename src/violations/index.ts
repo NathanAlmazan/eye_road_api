@@ -29,9 +29,9 @@ route.get('/', async (req, res) => {
     })
 
     const records = await client.traffic_monitoring_filedviolations.findMany();
-    const recordIds = records.map(record => record.id.toString())
+    const recordIds = records.map(record => parseInt(record.id.toString()))
 
-    const result = violations.filter(violation => !recordIds.includes(violation.id.toString()));
+    const result = violations.filter(violation => !recordIds.includes(parseInt(violation.id.toString())));
 
     // await redisClient.connect();
     // const totalViolations = await redisClient.get('violations');
@@ -113,6 +113,24 @@ route.get('/record/:id', async (req, res) => {
     }
 
     return res.status(404).json({ message: 'Record not found.' });
+})
+
+route.get('/notification', async (req, res) => {
+    // create payload: specified the details of the push notification
+    const payload = JSON.stringify({
+        title: 'Violation Detected',
+        body: 'Go to eyeroad.nat911.com to see details', 
+        icon: 'https://res.cloudinary.com/ddpqji6uq/image/upload/v1672565207/eye_road_wc5mwp.webp'
+    });
+
+    // pass the object into sendNotification function and catch any error
+    const subscribed = await client.traffic_monitoring_subscribedofficers.findMany();
+
+    subscribed.forEach(sub => {
+        webpush.sendNotification(JSON.parse(sub.subscription), payload).catch(err => console.error(err));
+    })
+
+    return res.status(201).json({ message: "Sent notification successfully." })
 })
 
 export default route;
