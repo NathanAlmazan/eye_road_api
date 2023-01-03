@@ -16,6 +16,7 @@ interface RecordedViolations {
     created?: Date;
     fee: number;
     record?: number | null;
+    timestamp?: number | null;
 }
 
 function getViolationType(type: string) {
@@ -86,7 +87,8 @@ route.get('/records', async (req, res) => {
             type: footage?.violation_type,
             created: footage?.violation_date,
             fee: recorded[i].violation_fee,
-            record: footage?.violation_footage
+            record: footage?.violation_footage,
+            timestamp: footage?.violation_mark
         })
     }
 
