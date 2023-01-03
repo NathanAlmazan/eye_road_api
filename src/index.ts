@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import webpush from 'web-push';
+import * as redis from 'redis';
 
 // database client
 import client from './client';
@@ -13,6 +14,15 @@ import violations from './violations';
 // initialize express app
 const app = express();
 const port = 4000 || process.env.PORT
+
+// redis
+export const redisClient = redis.createClient({
+    url: 'redis://127.0.0.1:6379'
+});
+
+const redisConnect = async () => {
+    await redisClient.connect();
+}
 
 // initialize web push
 const publicVapidKey = 'BMs4UAwpUebe4BJNVh2ZmdSyDHsEkqJTKlBDzOk2ADwTj8rdWVsdrYdgeUIxt-3KJLjYcCPLChLb7v_mcC4fvSE';
@@ -59,6 +69,11 @@ app.post('/subscribe', async (req, res) => {
 
 app.listen(port, () => {
     console.log('Listening on port ' + port);
+
+    redisConnect()
+        .then(() => console.log('Redis Connected.'))
+        .catch(err => console.log(err));
+
 }).on('error', (err: Error) => {
     console.log('Server Error', err.message);
 })

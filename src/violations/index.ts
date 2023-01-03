@@ -1,14 +1,10 @@
 import express from 'express';
-import * as redis from 'redis';
 // database client
 import client from '../client';
 import webpush from 'web-push';
+import { redisClient } from '..';
 
 const route = express.Router();
-
-const redisClient = redis.createClient({
-    url: 'redis://localhost:6379/'
-});
 
 const baseUrl = 'http://eyeroad.nat911.com/media/'
 
@@ -117,8 +113,11 @@ route.get('/record/:id', async (req, res) => {
 
 route.get('/notification', async (req, res) => {
     // create payload: specified the details of the push notification
+    await redisClient.set('violations', 2);
+    const totalViolations = await redisClient.get('violations');
+
     const payload = JSON.stringify({
-        title: 'Violation Detected',
+        title: totalViolations + ' Violation Detected',
         body: 'Go to eyeroad.nat911.com to see details', 
         icon: 'https://res.cloudinary.com/ddpqji6uq/image/upload/v1672565207/eye_road_wc5mwp.webp'
     });
