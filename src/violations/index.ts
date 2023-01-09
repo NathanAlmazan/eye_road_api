@@ -6,7 +6,7 @@ import { redisClient } from '..';
 
 const route = express.Router();
 
-const baseUrl = 'http://eyeroad.nat911.com/media/'
+const baseUrl = 'https://eyeroad.nat911.com/media/'
 
 interface RecordedViolations {
     id: string;
