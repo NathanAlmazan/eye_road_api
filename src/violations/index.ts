@@ -95,6 +95,18 @@ route.get('/records', async (req, res) => {
     return res.status(200).json(results);
 })
 
+route.delete('/record/:id', async (req, res) => {
+    const id: number = parseInt(req.params.id);
+
+    const deleted = await client.traffic_monitoring_recordedviolations.delete({
+        where: {
+            id: id
+        }
+    })
+
+    return res.status(200).json(deleted);
+})
+
 route.get('/record/:id', async (req, res) => {
     const id: number = parseInt(req.params.id);
 
