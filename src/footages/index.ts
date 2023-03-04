@@ -4,7 +4,7 @@ import client from '../client';
 
 const route = express.Router();
 
-const baseUrl = 'https://eyeroad.nat911.com/media/'
+const baseUrl = 'http://eyeroad.nat911.com/media/'
 
 route.get('/', async (req, res) => {
     const result = await client.traffic_monitoring_trafficfootage.findMany({
